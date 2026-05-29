@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenClaw Docker monitoring stack
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/openclaw
+ExecStart=/usr/bin/docker compose -f /opt/openclaw/docker-compose.yml up -d
+ExecStop=/usr/bin/docker compose -f /opt/openclaw/docker-compose.yml down
+RemainAfterExit=yes
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

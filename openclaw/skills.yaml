@@ -1,0 +1,33 @@
+skills:
+  - name: file_operations
+    enabled: true
+    capabilities:
+      - create_files
+      - move_files
+      - rename_files
+      - organize_downloads
+      - compress_folders
+  - name: development
+    enabled: true
+    capabilities:
+      - git_clone
+      - git_commit
+      - git_push
+      - run_scripts
+      - create_projects
+      - docker_management
+  - name: local_ai
+    enabled: true
+    model: qwen2.5:7b
+    capabilities:
+      - local_inference
+      - summarization
+      - report_generation
+      - log_analysis
+  - name: browser_automation
+    enabled: true
+    capabilities:
+      - open_websites
+      - form_filling
+      - downloads
+      - dashboard_monitoring

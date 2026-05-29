@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenClaw autonomous workstation agent
+After=network-online.target ollama.service docker.service
+Wants=network-online.target ollama.service docker.service
+
+[Service]
+Type=simple
+User=openclaw
+Group=openclaw
+WorkingDirectory=/opt/openclaw/app
+Environment=OPENCLAW_CONFIG=/opt/openclaw/config/config.yaml
+Environment=OLLAMA_BASE_URL=http://127.0.0.1:11434
+Environment=OLLAMA_DEFAULT_MODEL=qwen2.5:7b
+ExecStart=/bin/bash -lc 'if [ -x ./openclaw ]; then exec ./openclaw serve --host 0.0.0.0 --port 8080 --config "$OPENCLAW_CONFIG"; elif [ -f package.json ]; then exec npm run start -- --host 0.0.0.0 --port 8080; elif [ -f main.py ]; then exec /opt/openclaw/venv/bin/python main.py --host 0.0.0.0 --port 8080; else echo "Unknown OpenClaw upstream layout"; exit 1; fi'
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/opt/openclaw/logs/openclaw.log
+StandardError=append:/opt/openclaw/logs/openclaw.err.log
+
+[Install]
+WantedBy=multi-user.target

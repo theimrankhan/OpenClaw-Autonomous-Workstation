@@ -1,0 +1,69 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+  health_path: /health
+
+gateway:
+  enabled: true
+  bind: 0.0.0.0:8080
+  allow_origins:
+    - http://localhost
+    - http://127.0.0.1
+    - http://localhost:3000
+
+models:
+  default: qwen2.5:7b
+  providers:
+    ollama:
+      base_url: http://127.0.0.1:11434
+      default_model: qwen2.5:7b
+      timeout_seconds: 180
+
+storage:
+  root: /opt/openclaw
+  workspace: /opt/openclaw/workspace
+  memory: /opt/openclaw/memory
+  skills: /opt/openclaw/skills
+  logs: /opt/openclaw/logs
+  persistent: true
+
+tools:
+  file:
+    enabled: true
+    allowed_roots:
+      - /opt/openclaw/workspace
+      - /home
+      - /mnt
+    operations:
+      - create
+      - read
+      - move
+      - rename
+      - compress
+      - organize
+  terminal:
+    enabled: true
+    shell: /bin/bash
+    audit_log: /opt/openclaw/logs/commands.log
+    allowed_commands:
+      - git
+      - docker
+      - docker compose
+      - python3
+      - node
+      - npm
+      - bash
+      - tmux
+      - tar
+      - gzip
+  browser:
+    enabled: true
+    headless: true
+    downloads_dir: /opt/openclaw/workspace/downloads
+    audit_log: /opt/openclaw/logs/browser.log
+
+automation:
+  recovery_after_reboot: true
+  command_audit: true
+  action_audit: /opt/openclaw/logs/actions.log
+  resource_audit: /opt/openclaw/logs/resources.log

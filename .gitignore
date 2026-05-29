@@ -1,0 +1,5 @@
+.env
+*.pem
+awscliv2.zip
+__pycache__/
+*.log

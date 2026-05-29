@@ -1,0 +1,21 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {"datasource": "Prometheus", "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}, "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}, "id": 1, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}, "targets": [{"expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "refId": "A"}], "title": "CPU", "type": "stat"},
+    {"datasource": "Prometheus", "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}, "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}, "id": 2, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}, "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "refId": "A"}], "title": "RAM", "type": "stat"},
+    {"datasource": "Prometheus", "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}, "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}, "id": 3, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}, "targets": [{"expr": "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100", "refId": "A"}], "title": "Disk", "type": "stat"},
+    {"datasource": "Prometheus", "fieldConfig": {"defaults": {"unit": "Bps"}, "overrides": []}, "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}, "id": 4, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}, "targets": [{"expr": "sum(rate(node_network_receive_bytes_total[5m]) + rate(node_network_transmit_bytes_total[5m]))", "refId": "A"}], "title": "Network", "type": "stat"}
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "tags": ["openclaw", "host"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "OpenClaw Host Overview",
+  "uid": "openclaw-host"
+}

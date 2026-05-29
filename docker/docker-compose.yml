@@ -1,0 +1,115 @@
+name: openclaw-autonomous-workstation
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: openclaw-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  openclaw:
+    build:
+      context: /opt/openclaw/docker-openclaw
+      dockerfile: Dockerfile
+    container_name: openclaw-agent
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OPENCLAW_CONFIG: /opt/openclaw/config/config.yaml
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_DEFAULT_MODEL: qwen2.5:7b
+    ports:
+      - "8080:8080"
+    volumes:
+      - openclaw-config:/opt/openclaw/config
+      - openclaw-memory:/opt/openclaw/memory
+      - openclaw-skills:/opt/openclaw/skills
+      - openclaw-workspace:/opt/openclaw/workspace
+      - openclaw-logs:/opt/openclaw/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: openclaw-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/openclaw/monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: openclaw-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    pid: host
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro,rslave
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9100/metrics | head -1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: openclaw-grafana
+    restart: unless-stopped
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-now}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - /opt/openclaw/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - /opt/openclaw/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  ollama-data:
+  openclaw-config:
+  openclaw-memory:
+  openclaw-skills:
+  openclaw-workspace:
+  openclaw-logs:
+  prometheus-data:
+  grafana-data:

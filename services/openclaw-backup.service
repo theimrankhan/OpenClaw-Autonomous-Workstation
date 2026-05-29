@@ -1,0 +1,6 @@
+[Unit]
+Description=OpenClaw daily backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/openclaw-backup-daily
